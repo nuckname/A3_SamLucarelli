@@ -21,30 +21,41 @@ public class MapGenerator : MonoBehaviour {
 	public bool autoUpdate;
 
 	public TerrainType[] regions;
+	
+	[Header("Block options")]
+	public bool useSpatialBlocks = false; 
+	public int blockSize = 4;
+	public float contrastPower = 1f; 
 
-	public void GenerateMap() {
-		float[,] noiseMap = Noise.GenerateNoiseMap (mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
+	private MapDisplay display;
 
-		Color[] colourMap = new Color[mapWidth * mapHeight];
-		for (int y = 0; y < mapHeight; y++) {
-			for (int x = 0; x < mapWidth; x++) {
-				float currentHeight = noiseMap [x, y];
-				for (int i = 0; i < regions.Length; i++) {
-					if (currentHeight <= regions [i].height) {
-						colourMap [y * mapWidth + x] = regions [i].colour;
-						break;
-					}
-				}
-			}
-		}
 
-		MapDisplay display = FindObjectOfType<MapDisplay> ();
-		if (drawMode == DrawMode.NoiseMap) {
-			display.DrawTexture (TextureGenerator.TextureFromHeightMap(noiseMap));
-		} else if (drawMode == DrawMode.ColourMap) {
-			display.DrawTexture (TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight));
-		}
-	}
+	public void GenerateMap() 
+	{
+		float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
+
+	    if (useSpatialBlocks && blockSize > 1) {
+	        float[,] blocky = new float[mapWidth, mapHeight];
+	        for (int y = 0; y < mapHeight; y++) {
+	            for (int x = 0; x < mapWidth; x++) {
+	                int sampleX = Mathf.FloorToInt(x / (float)blockSize) * blockSize;
+	                int sampleY = Mathf.FloorToInt(y / (float)blockSize) * blockSize;
+	                sampleX = Mathf.Clamp(sampleX, 0, mapWidth - 1);
+	                sampleY = Mathf.Clamp(sampleY, 0, mapHeight - 1);
+	                blocky[x, y] = noiseMap[sampleX, sampleY];
+	            }
+	        }
+	        noiseMap = blocky;
+	    }
+
+	    MapDisplay display = FindObjectOfType<MapDisplay>();
+	    if (drawMode == DrawMode.NoiseMap) {
+	        display.DrawTexture(TextureGenerator.TextureFromHeightMap(noiseMap));
+	    } else if (drawMode == DrawMode.ColourMap) {
+	        display.DrawTexture(TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight));
+	    }
+}
+
 
 	void OnValidate() {
 		if (mapWidth < 1) {
@@ -64,7 +75,6 @@ public class MapGenerator : MonoBehaviour {
 
 [System.Serializable]
 public struct TerrainType {
-	public string name;
 	public float height;
 	public Color colour;
 }
