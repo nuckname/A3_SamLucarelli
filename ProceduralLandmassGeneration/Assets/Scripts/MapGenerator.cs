@@ -34,6 +34,19 @@ public class MapGenerator : MonoBehaviour {
 	{
 		float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
 
+		Color[] colourMap = new Color[mapWidth * mapHeight];
+		for (int y = 0; y < mapHeight; y++) {
+			for (int x = 0; x < mapWidth; x++) {
+				float currentHeight = noiseMap [x, y];
+				for (int i = 0; i < regions.Length; i++) {
+					if (currentHeight <= regions [i].height) {
+						colourMap [y * mapWidth + x] = regions [i].colour;
+						break;
+					}
+				}
+			}
+		}
+		
 	    if (useSpatialBlocks && blockSize > 1) {
 	        float[,] blocky = new float[mapWidth, mapHeight];
 	        for (int y = 0; y < mapHeight; y++) {
