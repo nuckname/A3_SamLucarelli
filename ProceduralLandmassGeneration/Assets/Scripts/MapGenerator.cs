@@ -3,7 +3,7 @@ using System.Collections;
 
 public class MapGenerator : MonoBehaviour {
 
-	public enum DrawMode {NoiseMap, ColourMap};
+	public enum DrawMode {NoiseMap, ColourMap, Mesh};
 	public DrawMode drawMode;
 
 	public int mapWidth;
@@ -23,15 +23,21 @@ public class MapGenerator : MonoBehaviour {
 	public TerrainType[] regions;
 	
 	[Header("Block options")]
-	public bool useSpatialBlocks = false; 
-	public int blockSize = 4;
-	public float contrastPower = 1f; 
+    public bool useSpatialBlocks = false;
+    [Min(1)] public int blockSize = 4;
+    [Range(0.1f, 8f)] public float contrastPower = 1f;
+    
+    public bool scaleBlockSizeByHeight = true;
+    [Min(1)] public int blockSizeMin = 2;
+    [Min(1)] public int blockSizeMax = 16;
+    [Range(0.1f, 5f)] public float blockSizeCurve = 1f;
+    public bool invertBlockSize = false;
+
+    public float meshHeightMulti = 1f;
 
 	public void GenerateMap() 
 	{
 		float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
-
-
 		
 		if (useSpatialBlocks && blockSize > 1) {
 			float[,] blocky = new float[mapWidth, mapHeight];
@@ -66,6 +72,9 @@ public class MapGenerator : MonoBehaviour {
 	    } else if (drawMode == DrawMode.ColourMap) {
 	        display.DrawTexture(TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight));
 	    }
+	    else if (drawMode == DrawMode.Mesh) {
+	        display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, meshHeightMulti), TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight));
+		}
 }
 
 
