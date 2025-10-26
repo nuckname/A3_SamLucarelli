@@ -17,9 +17,7 @@ public class MapGenerator : MonoBehaviour
     public int seed;
     public Vector2 offset;
 
-    public bool autoUpdate;
-
-    [Min(1)] public int regionCount = 2;
+    [Min(1)] public int heightCount = 2;
     public TerrainType[] regions;
 
     public Gradient regionGradient;
@@ -27,6 +25,7 @@ public class MapGenerator : MonoBehaviour
 
     [Min(1)] public int blockSize = 4;
 
+    [Range(0.1f, 5f)] public float heightPower = 1f;
     public float meshHeightMulti = 1f;
 
     public void GenerateMap()
@@ -46,6 +45,21 @@ public class MapGenerator : MonoBehaviour
             }
             noiseMap = blocky;
         }
+   
+        float[,] snapped = new float[mapWidth, mapHeight];
+        for (int y = 0; y < mapHeight; y++) {
+            for (int x = 0; x < mapWidth; x++) {
+                float h = noiseMap[x, y];
+                for (int i = 0; i < regions.Length; i++) {
+                    if (h <= regions[i].height) {
+                        snapped[x, y] = regions[i].height;
+                        break;
+                    }
+                }
+            }
+        }
+        noiseMap = snapped;
+   
 
         Color[] colourMap = new Color[mapWidth * mapHeight];
         for (int y = 0; y < mapHeight; y++) {
@@ -66,7 +80,7 @@ public class MapGenerator : MonoBehaviour
         } else if (drawMode == DrawMode.ColourMap) {
             display.DrawTexture(TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight));
         } else if (drawMode == DrawMode.Mesh) {
-            display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, meshHeightMulti), TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight));
+            display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, Mathf.Pow(meshHeightMulti, heightPower)), TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight));
         }
     }
 
@@ -76,27 +90,25 @@ public class MapGenerator : MonoBehaviour
         if (mapHeight < 1) mapHeight = 1;
         if (lacunarity < 1) lacunarity = 1;
         if (octaves < 0) octaves = 0;
-        if (regionCount < 1) regionCount = 1;
+        if (heightCount < 1) heightCount = 1;
 
         RebuildRegionsArray();
 
-        if (autoUpdate) GenerateMap();
+        GenerateMap();
     }
 
     void RebuildRegionsArray()
     {
-        if (regions == null || regions.Length != regionCount)
-            regions = new TerrainType[regionCount];
+        if (regions == null || regions.Length != heightCount)
+            regions = new TerrainType[heightCount];
 
-        for (int i = 0; i < regionCount; i++) 
+        for (int i = 0; i < heightCount; i++) 
         {
-            float t = (i + 1f) / regionCount;
+            float t = (i + 1f) / heightCount;
             float rounded = Mathf.Round(t * 100f) / 100f;
-            if (i == regionCount - 1) rounded = 1f;
+            if (i == heightCount - 1) rounded = 1f;
 
-            Color color;
-          
-            color = SampleRegionColor(i, regionCount);
+            Color color = SampleRegionColor(i, heightCount);
 
             regions[i] = new TerrainType { height = rounded, colour = color };
         }
@@ -104,9 +116,9 @@ public class MapGenerator : MonoBehaviour
 
     Color SampleRegionColor(int index, int count)
     {
-        float u = index / (count - 1f);
+        float u = (count <= 1) ? 0f : index / (count - 1f);
         if (reverseGradient) u = 1f - u;
-        float s = Mathf.Lerp(0, 1, u);
+        float s = Mathf.Lerp(0f, 1f, u);
         return regionGradient.Evaluate(s);
     }
 }
