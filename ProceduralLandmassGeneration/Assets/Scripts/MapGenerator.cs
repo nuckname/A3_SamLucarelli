@@ -25,8 +25,10 @@ public class MapGenerator : MonoBehaviour
 
     [Min(1)] public int blockSize = 4;
 
+    [Header("Height")]
     [Range(0.1f, 5f)] public float heightPower = 1f;
     public float meshHeightMulti = 1f;
+    public AnimationCurve heightCurve;
 
     public void GenerateMap()
     {
@@ -80,7 +82,8 @@ public class MapGenerator : MonoBehaviour
         } else if (drawMode == DrawMode.ColourMap) {
             display.DrawTexture(TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight));
         } else if (drawMode == DrawMode.Mesh) {
-            display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, Mathf.Pow(meshHeightMulti, heightPower)), TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight));
+            display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, Mathf.Pow(meshHeightMulti, heightPower), heightCurve),
+                TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight));
         }
     }
 
