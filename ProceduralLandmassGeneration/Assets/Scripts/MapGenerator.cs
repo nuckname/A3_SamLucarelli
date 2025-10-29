@@ -4,7 +4,6 @@ public class MapGenerator : MonoBehaviour
 {
     public MapTerrain mapTerrain; 
 
-    [ContextMenu("Generate Map")]
     public void GenerateMap()
     {
         float noiseScale = mapTerrain.useSeed ? mapTerrain.defaultNoiseScale   : mapTerrain.noiseScale;
@@ -120,7 +119,7 @@ public class MapGenerator : MonoBehaviour
     private void OnValidate()
     {
         //Keeps the scene previews responsive while not in playmode
-        if (!Application.isPlaying)
+        if (!Application.isPlaying && mapTerrain != null)
             GenerateMap();
     }
 }

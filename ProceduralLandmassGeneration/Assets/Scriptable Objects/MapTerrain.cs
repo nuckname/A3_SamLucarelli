@@ -1,10 +1,10 @@
 using UnityEngine;
 
 
-[CreateAssetMenu(menuName = "Terrain", fileName = "TerrainSettings")]
-public class MapTerrain : MonoBehaviour
+[CreateAssetMenu(menuName = "Map/MapTerrain", fileName = "TerrainSettings")]
+public class MapTerrain : ScriptableObject
 {
-public enum DrawMode { NoiseMap, ColourMap, Mesh }
+    public enum DrawMode { NoiseMap, ColourMap, Mesh }
     public DrawMode drawMode = DrawMode.ColourMap;
 
     [Header("Map Size")]
