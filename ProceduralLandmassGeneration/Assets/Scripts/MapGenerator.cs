@@ -4,13 +4,13 @@ public class MapGenerator : MonoBehaviour
 {
     public MapTerrain mapTerrain; 
 
-    public void GenerateMap()
+   public void GenerateMap()
     {
-        float noiseScale = mapTerrain.useSeed ? mapTerrain.defaultNoiseScale   : mapTerrain.noiseScale;
-        int octaves = mapTerrain.useSeed ? mapTerrain.defaultOctaves      : mapTerrain.octaves;
-        float persistance = mapTerrain.useSeed ? mapTerrain.defaultPersistance  : mapTerrain.persistance;
-        float lacunarity = mapTerrain.useSeed ? mapTerrain.defaultLacunarity   : mapTerrain.lacunarity;
-        int blockSize = mapTerrain.useSeed ? mapTerrain.defaultBlockSize    : mapTerrain.blockSize;
+        float noiseScale = mapTerrain.useSeed ? mapTerrain.defaultNoiseScale : mapTerrain.noiseScale;
+        int octaves = mapTerrain.useSeed ? mapTerrain.defaultOctaves : mapTerrain.octaves;
+        float persistance = mapTerrain.useSeed ? mapTerrain.defaultPersistance : mapTerrain.persistance;
+        float lacunarity = mapTerrain.useSeed ? mapTerrain.defaultLacunarity : mapTerrain.lacunarity;
+        int blockSize = mapTerrain.useSeed ? mapTerrain.defaultBlockSize : mapTerrain.blockSize;
         int seed = mapTerrain.seed;
 
         int mapWidth  = Mathf.Max(1, mapTerrain.mapWidth);
@@ -19,7 +19,8 @@ public class MapGenerator : MonoBehaviour
         mapTerrain.RebuildRegionsArray();
         var regions = mapTerrain.regions;
 
-        float[,] noiseMap = Noise.GenerateNoiseMap(
+
+        float[,] heightMap = Noise.GenerateNoiseMap(
             mapWidth:   mapWidth,
             mapHeight:  mapHeight,
             seed:       seed,
@@ -41,48 +42,45 @@ public class MapGenerator : MonoBehaviour
                     int sampleY = Mathf.FloorToInt(y / (float)blockSize) * blockSize;
                     sampleX = Mathf.Clamp(sampleX, 0, mapWidth  - 1);
                     sampleY = Mathf.Clamp(sampleY, 0, mapHeight - 1);
-                    blocky[x, y] = noiseMap[sampleX, sampleY];
+                    blocky[x, y] = heightMap[sampleX, sampleY];
                 }
             }
-            noiseMap = blocky;
+            heightMap = blocky;
         }
 
-        // Snap heights to region thresholds
-       
-        float[,] snapped = new float[mapWidth, mapHeight];
+        float[,] regionMap = new float[mapWidth, mapHeight];
         for (int y = 0; y < mapHeight; y++)
+        for (int x = 0; x < mapWidth; x++)
         {
-            for (int x = 0; x < mapWidth; x++)
+            float h = heightMap[x, y];
+            bool matched = false;
+            for (int i = 0; i < regions.Length; i++)
             {
-                float h = noiseMap[x, y];
-                for (int i = 0; i < regions.Length; i++)
+                if (h <= regions[i].height)
                 {
-                    if (h <= regions[i].height)
-                    {
-                        snapped[x, y] = regions[i].height;
-                        break;
-                    }
+                    regionMap[x, y] = regions[i].height;
+                    matched = true;
+                    break;
                 }
             }
         }
-        noiseMap = snapped;
-   
 
-        // Build colour map
         Color[] colourMap = new Color[mapWidth * mapHeight];
         for (int y = 0; y < mapHeight; y++)
         {
             for (int x = 0; x < mapWidth; x++)
             {
-                float currentHeight = noiseMap[x, y];
+                float h = heightMap[x, y];
+                Color c = regions[regions.Length - 1].colour;
                 for (int i = 0; i < regions.Length; i++)
                 {
-                    if (currentHeight <= regions[i].height)
-                    {
-                        colourMap[y * mapWidth + x] = regions[i].colour;
-                        break;
+                    if (h <= regions[i].height) 
+                    { 
+                        c = regions[i].colour; 
+                        break; 
                     }
                 }
+                colourMap[y * mapWidth + x] = c;
             }
         }
 
@@ -94,27 +92,29 @@ public class MapGenerator : MonoBehaviour
             return;
         }
 
-        if (mapTerrain.drawMode == MapTerrain.DrawMode.NoiseMap)
+        switch (mapTerrain.drawMode)
         {
-            display.DrawTexture(TextureGenerator.TextureFromHeightMap(noiseMap));
-        }
-        else if (mapTerrain.drawMode == MapTerrain.DrawMode.ColourMap)
-        {
-            display.DrawTexture(TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight));
-        }
-        else
-        {
-            //Mesh
-            display.DrawMesh(
-                MeshGenerator.GenerateTerrainMesh(
-                    noiseMap,
-                    Mathf.Pow(mapTerrain.meshHeightMulti, mapTerrain.heightPower),
-                    mapTerrain.heightCurve
-                ),
-                TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight)
-            );
+            case MapTerrain.DrawMode.NoiseMap:
+                display.DrawTexture(TextureGenerator.TextureFromHeightMap(heightMap));
+                break;
+
+            case MapTerrain.DrawMode.ColourMap:
+                display.DrawTexture(TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight));
+                break;
+
+            case MapTerrain.DrawMode.Mesh:
+                display.DrawMesh(
+                    MeshGenerator.GenerateTerrainMesh(
+                        heightMap,
+                        Mathf.Pow(mapTerrain.meshHeightMulti, mapTerrain.heightPower),
+                        mapTerrain.heightCurve
+                    ),
+                    TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight)
+                );
+                break;
         }
     }
+
 
     private void OnValidate()
     {
