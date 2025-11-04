@@ -5,43 +5,101 @@ using UnityEngine;
 public class MapTerrain : ScriptableObject
 {
     public enum DrawMode { NoiseMap, ColourMap, Mesh }
-    public DrawMode drawMode = DrawMode.ColourMap;
 
-    [Header("Map Size")]
-    [Min(1)] public int mapWidth = 256;
-    [Min(1)] public int mapHeight = 256;
+	[Tooltip("Changes the display of the map")]
+	public DrawMode drawMode = DrawMode.ColourMap;
 
-    [Header("Noise")]
-    [Min(0.0001f)] public float noiseScale = 50f;
-    [Min(0)] public int octaves = 4;
-    [Range(0, 1)] public float persistance = 0.5f;
-    [Min(1)] public float lacunarity = 2f;
-    public Vector2 offset;
-
-    [Header("Regions")]
-    [Min(1)] public int heightCount = 2;
-    public TerrainType[] regions;
-    public Gradient regionGradient;
-    public bool reverseGradient = false;
-
-    [Header("Blockiness")]
-    [Min(1)] public int blockSize = 4;
-
-    [Header("Height / Mesh")]
-    [Range(0.1f, 5f)] public float heightPower = 1f;
-    public float meshHeightMulti = 1f;
-    public AnimationCurve heightCurve = AnimationCurve.Linear(0, 0, 1, 1);
-
-    [Header("Seed & Defaults")]
-    public bool useSeed = true;
-    public int seed = 0;
-
-    [Tooltip("If 'Use Seed' is ON, these defaults are applied at generation time.")]
-    public float defaultNoiseScale = 50f;
-    public int defaultOctaves = 4;
-    [Range(0, 1)] public float defaultPersistance = 0.5f;
-    public float defaultLacunarity = 2f;
-    public int defaultBlockSize = 10;
+    [Header("Map Size & Detail")]
+        [InspectorName("Map Width")]
+        [Tooltip("How wide the map is")]
+        [Min(1)] public int mapWidth = 256;
+    
+	    [InspectorName("Map Height")]
+        [Tooltip("How long the map is")]
+        [Min(1)] public int mapHeight = 256;
+    
+        [Space(6)]
+        [InspectorName("Map Zoom")]
+        [Tooltip("How zoomed-in the terrain pattern is. Lower = bigger hills (chunky). Higher = finer details.")]
+        [Min(0.0001f)] public float noiseScale = 50f;
+    
+    // ---------- Terrain Pattern (Noise) ----------
+    [Header("Terrain Pattern")]
+        [InspectorName("Layers")]
+        [Tooltip("How many layers of noise are stacked. More layers = richer, more varied terrain (slower).")]
+        [Min(0)] public int octaves = 4;
+    
+        [InspectorName("Smoothness")]
+        [Tooltip("How quickly detail fades across layers. Lower = smoother, Higher = rougher textures.")]
+        [Range(0, 1)] public float persistance = 0.5f;
+    
+        [InspectorName("Lacunarity")]
+        [Tooltip("How much each layer zooms in compared to the previous. Higher = more tiny features.")]
+        [Min(1)] public float lacunarity = 2f;
+    
+        [InspectorName("Offset (Pan)")]
+        [Tooltip("Moves the noise pattern left/right/up/down without changing its shape.")]
+        public Vector2 offset;
+    
+    // ---------- Regions & Colours ----------
+    [Header("Regions & Colours")]
+        [InspectorName("Number of Regions")]
+        [Tooltip("How many color/elevation bands (e.g., water, sand, grass, rock, snow).")]
+        [Min(1)] public int heightCount = 2;
+    
+        [InspectorName("Height")]
+        [Tooltip("Each region has a height threshold (0..1) and a color.")]
+        public TerrainType[] regions;
+    
+        [InspectorName("Region Gradient")]
+        [Tooltip("Auto-generate region colors from this gradient (used when you rebuild regions).")]
+        public Gradient regionGradient;
+    
+        [InspectorName("Reverse Gradient")]
+        [Tooltip("Flip the gradient from top-to-bottom when generating region colors.")]
+        public bool reverseGradient = false;
+    
+    // ---------- Terrain Type ----------
+        [Header("Terrain Type")]
+        [InspectorName("Block Size")]
+        [Tooltip("How chunky the map looks. Higher = bigger square blocks.")]
+        [Min(1)] public int blockSize = 4;
+    
+        [Header("Height & 3D Output")]
+        [InspectorName("Height Power")]
+        [Tooltip("Bends the height curve. <1 flattens low areas; >1 exaggerates peaks.")]
+        [Range(0.1f, 5f)] public float heightPower = 1f;
+    
+        [InspectorName("Mesh Height Multiplier")]
+        [Tooltip("How tall the 3D mesh can get. Higher = taller mountains.")]
+        public float meshHeightMulti = 1f;
+        
+        [InspectorName("Height Curve")]
+        [Tooltip("Fine-tune how raw noise (0..1) maps to final height. Left=low, Right=high.")]
+    	public AnimationCurve heightCurve = AnimationCurve.Linear(0, 0, 1, 1);
+    
+    // ---------- Seeded Randomness ----------
+    [Header("Seeded Randomness")]
+        [InspectorName("Use Seed")]
+        [Tooltip("Turn ON to get repeatable maps. Turn OFF for a fresh random map each time.")]
+        public bool useSeed = true;
+    
+        [InspectorName("Seed Value")]
+        [Tooltip("Type any number. The same seed + settings = the same map.")]
+        public int seed = 0;
+    
+        [Header("Defaults (Applied When 'Use Seed' Is ON)")]
+        [Tooltip("If 'Use Seed' is ON, these default values are used instead of the sliders above.")]
+        [InspectorName("Default Noise Scale")] public float defaultNoiseScale = 50f;
+    
+        [InspectorName("Default Octaves")] public int defaultOctaves = 4;
+        
+        [InspectorName("Default Persistence")]
+        [Range(0, 1)] public float defaultPersistance = 0.5f;
+        
+        [InspectorName("Default Lacunarity")] public float defaultLacunarity = 2f;
+    
+    	[InspectorName("Default Block Size")] public int defaultBlockSize = 10;
 
     // Make the asset self-consistent when edited
     private void OnValidate()

@@ -6,6 +6,8 @@ public class ExtendedWindow : EditorWindow
     protected SerializedObject serializedObject;
     protected SerializedProperty currnetProperty;
 
+    private string selectedPropertyPath;
+    protected SerializedProperty selectedProperty;
     protected void DrawProperties(SerializedProperty prop, bool drawChildren)
     {
         string lastPropPath = string.Empty;
@@ -30,6 +32,22 @@ public class ExtendedWindow : EditorWindow
                 lastPropPath = p.propertyPath;
                 EditorGUILayout.PropertyField(p, drawChildren);
             }
+        }
+    }
+
+    protected void DrawSideBar(SerializedProperty prop)
+    {
+        foreach (SerializedProperty p in prop)
+        {
+            if (GUILayout.Button(p.displayName))
+            {
+                selectedPropertyPath = p.propertyPath; 
+            }
+        }
+
+        if (!string.IsNullOrEmpty(selectedPropertyPath))
+        {
+            selectedProperty = serializedObject.FindProperty(selectedPropertyPath);
         }
     }
 }
