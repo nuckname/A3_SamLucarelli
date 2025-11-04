@@ -18,7 +18,7 @@ public class TerrainWindow : ExtendedWindow
 
     public static void Open(MapTerrain mapTerrain)
     {
-        var window = GetWindow<TerrainWindow>("Game Data Editor");
+        var window = GetWindow<TerrainWindow>("Terrain Editor");
         window.targetAsset = mapTerrain;
         window.serializedObject = new SerializedObject(mapTerrain);
         window._selectedGroup = null;
@@ -55,7 +55,7 @@ public class TerrainWindow : ExtendedWindow
             }
             else
             {
-                _selectedGroup = "Other";
+                _selectedGroup = "Draw Mode";
             }
         }
 
@@ -156,7 +156,7 @@ public class TerrainWindow : ExtendedWindow
         var type = target.GetType();
         const BindingFlags bf = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        string lastGroup = "Other";
+        string lastGroup = "Draw Mode";
 
         foreach (var p in props)
         {

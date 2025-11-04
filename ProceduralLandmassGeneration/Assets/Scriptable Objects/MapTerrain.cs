@@ -4,7 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Map/MapTerrain", fileName = "TerrainSettings")]
 public class MapTerrain : ScriptableObject
 {
-    public enum DrawMode { NoiseMap, ColourMap, Mesh }
+    public enum DrawMode { NoiseMap, ColourMap, Mesh, All }
 
 	[Tooltip("Changes the display of the map")]
 	public DrawMode drawMode = DrawMode.ColourMap;
@@ -86,7 +86,7 @@ public class MapTerrain : ScriptableObject
         [Tooltip("Type any number. The same seed + settings = the same map.")]
         public int seed = 0;
     
-        [Header("Defaults")]
+        [Header("Seed Default")]
         [Tooltip("If 'Use Seed' is ON, these default values are used instead of the sliders above.")]
         [InspectorName("Default Noise Scale")] public float defaultNoiseScale = 50f;
     

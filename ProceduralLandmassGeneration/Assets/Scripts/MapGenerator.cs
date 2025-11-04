@@ -4,6 +4,8 @@ public class MapGenerator : MonoBehaviour
 {
     public MapTerrain mapTerrain; 
 
+	public enum MeshType { NoiseMap, ColourMap}
+    
    public void GenerateMap()
     {
         float noiseScale = mapTerrain.useSeed ? mapTerrain.defaultNoiseScale : mapTerrain.noiseScale;
@@ -95,11 +97,11 @@ public class MapGenerator : MonoBehaviour
         switch (mapTerrain.drawMode)
         {
             case MapTerrain.DrawMode.NoiseMap:
-                display.DrawTexture(TextureGenerator.TextureFromHeightMap(heightMap));
+                display.DrawTexture(TextureGenerator.TextureFromHeightMap(heightMap), MeshType.NoiseMap);
                 break;
 
             case MapTerrain.DrawMode.ColourMap:
-                display.DrawTexture(TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight));
+                display.DrawTexture(TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight), MeshType.ColourMap);
                 break;
 
             case MapTerrain.DrawMode.Mesh:
@@ -112,6 +114,24 @@ public class MapGenerator : MonoBehaviour
                     TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight)
                 );
                 break;
+            
+            case MapTerrain.DrawMode.All:
+            {
+                display.DrawTexture(TextureGenerator.TextureFromHeightMap(heightMap), MeshType.NoiseMap);
+                
+                display.DrawTexture(TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight), MeshType.ColourMap);
+                
+                display.DrawMesh(
+                    MeshGenerator.GenerateTerrainMesh(
+                        heightMap,
+                        Mathf.Pow(mapTerrain.meshHeightMulti, mapTerrain.heightPower),
+                        mapTerrain.heightCurve
+                    ),
+                    TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight)
+                );
+                
+                break;
+            }
         }
     }
 
