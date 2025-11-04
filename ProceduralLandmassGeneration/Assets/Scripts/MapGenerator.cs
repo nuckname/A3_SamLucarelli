@@ -2,11 +2,11 @@
 
 public class MapGenerator : MonoBehaviour
 {
-    public MapTerrain mapTerrain; 
+    public MapTerrain mapTerrain;
 
-	public enum MeshType { NoiseMap, ColourMap}
-    
-   public void GenerateMap()
+    public enum MeshType { NoiseMap, ColourMap }
+
+    public void GenerateMap()
     {
         float noiseScale = mapTerrain.useSeed ? mapTerrain.defaultNoiseScale : mapTerrain.noiseScale;
         int octaves = mapTerrain.useSeed ? mapTerrain.defaultOctaves : mapTerrain.octaves;
@@ -20,7 +20,6 @@ public class MapGenerator : MonoBehaviour
 
         mapTerrain.RebuildRegionsArray();
         var regions = mapTerrain.regions;
-
 
         float[,] heightMap = Noise.GenerateNoiseMap(
             mapWidth:   mapWidth,
@@ -49,23 +48,8 @@ public class MapGenerator : MonoBehaviour
             }
             heightMap = blocky;
         }
-
-        float[,] regionMap = new float[mapWidth, mapHeight];
-        for (int y = 0; y < mapHeight; y++)
-        for (int x = 0; x < mapWidth; x++)
-        {
-            float h = heightMap[x, y];
-            bool matched = false;
-            for (int i = 0; i < regions.Length; i++)
-            {
-                if (h <= regions[i].height)
-                {
-                    regionMap[x, y] = regions[i].height;
-                    matched = true;
-                    break;
-                }
-            }
-        }
+        
+        float[,] quantized = BuildQuantizedHeightMap(heightMap, regions, mapTerrain.heightMode);
 
         Color[] colourMap = new Color[mapWidth * mapHeight];
         for (int y = 0; y < mapHeight; y++)
@@ -107,34 +91,73 @@ public class MapGenerator : MonoBehaviour
             case MapTerrain.DrawMode.Mesh:
                 display.DrawMesh(
                     MeshGenerator.GenerateTerrainMesh(
-                        heightMap,
+                        mapTerrain.heightMode == MapTerrain.HeightMode.Continuous ? heightMap : quantized,
                         Mathf.Pow(mapTerrain.meshHeightMulti, mapTerrain.heightPower),
                         mapTerrain.heightCurve
                     ),
                     TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight)
                 );
                 break;
-            
+
             case MapTerrain.DrawMode.All:
             {
                 display.DrawTexture(TextureGenerator.TextureFromHeightMap(heightMap), MeshType.NoiseMap);
-                
+
                 display.DrawTexture(TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight), MeshType.ColourMap);
-                
+
                 display.DrawMesh(
                     MeshGenerator.GenerateTerrainMesh(
-                        heightMap,
+                        mapTerrain.heightMode == MapTerrain.HeightMode.Continuous ? heightMap : quantized,
                         Mathf.Pow(mapTerrain.meshHeightMulti, mapTerrain.heightPower),
                         mapTerrain.heightCurve
                     ),
                     TextureGenerator.TextureFromColourMap(colourMap, mapWidth, mapHeight)
                 );
-                
                 break;
             }
         }
     }
 
+    //Chat GPT used
+    // https://chatgpt.com/share/690a7c33-78ac-8000-a63d-289427ef4705
+    private static float[,] BuildQuantizedHeightMap(float[,] src, TerrainType[] regions, MapTerrain.HeightMode mode)
+    {
+        if (mode == MapTerrain.HeightMode.Continuous)
+            return src; // no change
+
+        int w = src.GetLength(0);
+        int h = src.GetLength(1);
+        float[,] q = new float[w, h];
+
+        // Precompute band lower bounds for midpoints
+        float[] uppers = new float[regions.Length];
+        for (int i = 0; i < regions.Length; i++) uppers[i] = regions[i].height;
+
+        float prevUpper = 0f;
+
+        for (int y = 0; y < h; y++)
+        {
+            for (int x = 0; x < w; x++)
+            {
+                float v = src[x, y];
+
+                // Find the band index
+                int idx = regions.Length - 1;
+                for (int i = 0; i < regions.Length; i++)
+                {
+                    if (v <= uppers[i]) { idx = i; break; }
+                }
+
+                if (mode == MapTerrain.HeightMode.Stepped)
+                {
+                    // Snap to the upper threshold
+                    q[x, y] = uppers[idx];
+                }
+            }
+        }
+
+        return q;
+    }
 
     private void OnValidate()
     {

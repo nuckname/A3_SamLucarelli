@@ -5,6 +5,8 @@ using UnityEngine;
 public class MapTerrain : ScriptableObject
 {
     public enum DrawMode { NoiseMap, ColourMap, Mesh, All }
+    
+    public enum HeightMode { Continuous, Stepped }
 
 	[Tooltip("Changes the display of the map")]
 	public DrawMode drawMode = DrawMode.ColourMap;
@@ -44,11 +46,11 @@ public class MapTerrain : ScriptableObject
     // ---------- Regions & Colours ----------
     [Header("Regions & Colours")]
         [InspectorName("Number of Regions")]
-        [Tooltip("How many color/elevation bands (e.g., water, sand, grass, rock, snow).")]
+        [Tooltip("Amount of heights the terrain has.")]
         [Min(1)] public int heightCount = 2;
     
         [InspectorName("Height")]
-        [Tooltip("Each region has a height threshold (0..1) and a color.")]
+        [Tooltip("Each region has a height threshold and a color.")]
         public TerrainType[] regions;
     
         [InspectorName("Region Gradient")]
@@ -64,17 +66,22 @@ public class MapTerrain : ScriptableObject
         [Min(1)] public int blockSize = 4;
     
         [Header("Height")]
-        [InspectorName("Height Power")]
-        [Tooltip("Bends the height curve. <1 flattens low areas; >1 exaggerates peaks.")]
-        [Range(0.1f, 5f)] public float heightPower = 1f;
-    
-        [InspectorName("Mesh Height Multiplier")]
-        [Tooltip("How tall the mesh is.")]
-        public float meshHeightMulti = 1f;
+            [InspectorName("Height Power")]
+            [Tooltip("Bends the height curve. <1 flattens low areas; >1 exaggerates peaks.")]
+            [Range(0.1f, 5f)] public float heightPower = 1f;
         
-        [InspectorName("Height Curve")]
-        [Tooltip("Fine-tune how raw noise (0..1) maps to final height. Left=low, Right=high.")]
-    	public AnimationCurve heightCurve = AnimationCurve.Linear(0, 0, 1, 1);
+            [InspectorName("Mesh Height Multiplier")]
+            [Tooltip("How tall the mesh is.")]
+            public float meshHeightMulti = 1f;
+            
+            [InspectorName("Height Curve")]
+            [Tooltip("Fine-tune how raw noise (0..1) maps to final height. Left=low, Right=high.")]
+    	    public AnimationCurve heightCurve = AnimationCurve.Linear(0, 0, 1, 1);
+    	    
+            [InspectorName("Height Mode")]
+            [Tooltip("Changes the height type of the terrain.")]
+            public HeightMode heightMode = HeightMode.Continuous;
+   
     
     // ---------- Seed ----------
     [Header("Seed")]
