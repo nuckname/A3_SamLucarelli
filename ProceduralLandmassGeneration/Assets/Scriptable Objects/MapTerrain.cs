@@ -58,28 +58,26 @@ public class MapTerrain : ScriptableObject
         [InspectorName("Reverse Gradient")]
         [Tooltip("Flip the gradient from top-to-bottom when generating region colors.")]
         public bool reverseGradient = false;
-    
-    // ---------- Terrain Type ----------
-        [Header("Terrain Type")]
+
         [InspectorName("Block Size")]
         [Tooltip("How chunky the map looks. Higher = bigger square blocks.")]
         [Min(1)] public int blockSize = 4;
     
-        [Header("Height & 3D Output")]
+        [Header("Height")]
         [InspectorName("Height Power")]
         [Tooltip("Bends the height curve. <1 flattens low areas; >1 exaggerates peaks.")]
         [Range(0.1f, 5f)] public float heightPower = 1f;
     
         [InspectorName("Mesh Height Multiplier")]
-        [Tooltip("How tall the 3D mesh can get. Higher = taller mountains.")]
+        [Tooltip("How tall the mesh is.")]
         public float meshHeightMulti = 1f;
         
         [InspectorName("Height Curve")]
         [Tooltip("Fine-tune how raw noise (0..1) maps to final height. Left=low, Right=high.")]
     	public AnimationCurve heightCurve = AnimationCurve.Linear(0, 0, 1, 1);
     
-    // ---------- Seeded Randomness ----------
-    [Header("Seeded Randomness")]
+    // ---------- Seed ----------
+    [Header("Seed")]
         [InspectorName("Use Seed")]
         [Tooltip("Turn ON to get repeatable maps. Turn OFF for a fresh random map each time.")]
         public bool useSeed = true;
@@ -88,7 +86,7 @@ public class MapTerrain : ScriptableObject
         [Tooltip("Type any number. The same seed + settings = the same map.")]
         public int seed = 0;
     
-        [Header("Defaults (Applied When 'Use Seed' Is ON)")]
+        [Header("Defaults")]
         [Tooltip("If 'Use Seed' is ON, these default values are used instead of the sliders above.")]
         [InspectorName("Default Noise Scale")] public float defaultNoiseScale = 50f;
     

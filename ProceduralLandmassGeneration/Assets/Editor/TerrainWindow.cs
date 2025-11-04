@@ -62,7 +62,7 @@ public class TerrainWindow : ExtendedWindow
         using (new EditorGUILayout.HorizontalScope())
         {
             //Left side bar with header names
-            using (new EditorGUILayout.VerticalScope(GUILayout.Width(300)))
+            using (new EditorGUILayout.VerticalScope(GUILayout.Width(50)))
             {
                 EditorGUILayout.Space(5);
                 EditorGUILayout.LabelField("Sections", EditorStyles.boldLabel);
@@ -201,5 +201,18 @@ public class TerrainWindow : ExtendedWindow
     private void GenerateFromWindow()
     {
         serializedObject.ApplyModifiedProperties();
+
+        MapGenerator mapGen = FindObjectOfType<MapGenerator>();
+
+        if (mapGen == null)
+        {
+            Debug.LogWarning("cant find object");
+            return;
+        }
+
+        mapGen.GenerateMap();
+
+        Debug.Log("Map generated successfully from TerrainWindow.");
     }
+
 }
