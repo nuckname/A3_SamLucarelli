@@ -101,6 +101,8 @@ public class TerrainWindow : ExtendedWindow
                 EditorGUILayout.Space(2);
                 EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 
+                bool changedValue = false;
+                
                 _rightScroll = EditorGUILayout.BeginScrollView(_rightScroll);
 
                 if (groups.TryGetValue(_selectedGroup, out var propsInGroup))
@@ -110,6 +112,8 @@ public class TerrainWindow : ExtendedWindow
                         foreach (var p in propsInGroup)
                             EditorGUILayout.PropertyField(p, true);
                     }
+                    
+                    changedValue = true;
                 }
                 else
                 {
@@ -121,6 +125,14 @@ public class TerrainWindow : ExtendedWindow
                 EditorGUILayout.Space(4);
                 EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 
+                if (changedValue)
+                {
+                    serializedObject.ApplyModifiedProperties();
+                    GenerateFromWindow();
+
+                    Debug.Log("Called");
+                }
+                
                 //Also put the generate button at the bottom of the right pane
                 using (new EditorGUILayout.HorizontalScope())
                 {
