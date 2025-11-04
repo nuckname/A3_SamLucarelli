@@ -154,16 +154,21 @@ public class TerrainWindow : ExtendedWindow
         var type = target.GetType();
         const BindingFlags bf = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
+        string lastGroup = "Other";
+
         foreach (var p in props)
         {
             var field = type.GetField(p.name, bf);
-            string group = "Other";
+            string group = lastGroup;
+
             if (field != null)
             {
                 var header = field.GetCustomAttribute<HeaderAttribute>();
                 if (header != null && !string.IsNullOrEmpty(header.header))
                     group = header.header;
             }
+
+            lastGroup = group;
 
             if (!result.TryGetValue(group, out var list))
             {
@@ -173,6 +178,7 @@ public class TerrainWindow : ExtendedWindow
             list.Add(p);
         }
 
+        //Preserve the correct order
         foreach (var key in result.Keys.ToList())
             result[key] = result[key].OrderBy(p => FieldOrder(type, p.name)).ToList();
 
