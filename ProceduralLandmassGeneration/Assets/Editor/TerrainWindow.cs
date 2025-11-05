@@ -125,12 +125,15 @@ public class TerrainWindow : ExtendedWindow
                 EditorGUILayout.Space(4);
                 EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 
-                if (changedValue)
+                if (changedValue && targetAsset.autoUpdate)
                 {
                     serializedObject.ApplyModifiedProperties();
                     GenerateFromWindow();
 
                     Debug.Log("Called");
+
+                    //Dont display generate button.
+                    return;
                 }
                 
                 //Also put the generate button at the bottom of the right pane

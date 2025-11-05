@@ -105,6 +105,12 @@ public class MapTerrain : ScriptableObject
         [InspectorName("Default Lacunarity")] public float defaultLacunarity = 2f;
     
     	[InspectorName("Default Block Size")] public int defaultBlockSize = 10;
+        
+            
+        [Header("Editor")]
+        [InspectorName("Auto Update")]
+        [Tooltip("Automatically updates the terrain without having to click the generate button.")]
+        public bool autoUpdate = false;
 
     // Make the asset self-consistent when edited
     private void OnValidate()
