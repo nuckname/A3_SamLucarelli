@@ -116,6 +116,10 @@ public class MapTerrain : ScriptableObject
         [Tooltip("Automatically updates the terrain without having to click the generate button.")]
         public bool autoUpdate = false;
 
+        
+     // References   
+     [SerializeField] private GradientMapTerrain gradientMapTerrain;   
+     
     // Make the asset self-consistent when edited
     private void OnValidate()
     {
@@ -123,34 +127,47 @@ public class MapTerrain : ScriptableObject
         if (octaves < 0) octaves = 0;
         if (heightCount < 1) heightCount = 1;
 
+        
         if (useColourGradient)
         {
-            RebuildRegionsArray();
+            gradientMapTerrain.ApplyGradientToRegions();
+        }
+        else
+        {
+            gradientMapTerrain.RebuildKeepColours();
         }
     }
 
     public void RebuildRegionsArray()
     {
+        Color[] oldColours = null;
+        if (regions != null)
+        {
+            oldColours = new Color[regions.Length];
+            for (int i = 0; i < regions.Length; i++)
+                oldColours[i] = regions[i].colour;
+        }
+
         if (regions == null || regions.Length != heightCount)
             regions = new TerrainType[heightCount];
 
+        //updates each region
         for (int i = 0; i < heightCount; i++)
         {
+            //Height
             float t = (i + 1f) / heightCount;
             float rounded = Mathf.Round(t * 100f) / 100f;
             if (i == heightCount - 1) rounded = 1f;
 
-            Color color = SampleRegionColor(i, heightCount);
-            regions[i] = new TerrainType { height = rounded, colour = color };
-        }
-    }
+            var elem = regions[i];
 
-    private Color SampleRegionColor(int index, int count)
-    {
-        float u = (count <= 1) ? 0f : index / (count - 1f);
-        if (reverseGradient) u = 1f - u;
-        float s = Mathf.Lerp(0f, 1f, u);
-        return regionGradient != null ? regionGradient.Evaluate(s) : Color.white;
+            elem.height = rounded;
+
+            if (oldColours != null && i < oldColours.Length)
+                elem.colour = oldColours[i];
+
+            regions[i] = elem;
+        }
     }
 }
 
