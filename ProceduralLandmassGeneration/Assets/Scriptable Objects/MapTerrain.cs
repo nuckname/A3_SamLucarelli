@@ -53,6 +53,10 @@ public class MapTerrain : ScriptableObject
         [Tooltip("Each region has a height threshold and a color.")]
         public TerrainType[] regions;
     
+        [InspectorName("Use Colour Gradient")]
+        [Tooltip("Auto-generate region colors from this gradient (used when you rebuild regions).")]
+        public bool useColourGradient = true;
+        
         [InspectorName("Region Gradient")]
         [Tooltip("Auto-generate region colors from this gradient (used when you rebuild regions).")]
         public Gradient regionGradient;
@@ -100,7 +104,7 @@ public class MapTerrain : ScriptableObject
         [InspectorName("Default Octaves")] public int defaultOctaves = 4;
         
         [InspectorName("Default Persistence")]
-        [Range(0, 1)] public float defaultPersistance = 0.5f;
+        [Range(0, 1)] public float defaultPersistence = 0.5f;
         
         [InspectorName("Default Lacunarity")] public float defaultLacunarity = 2f;
     
@@ -119,7 +123,10 @@ public class MapTerrain : ScriptableObject
         if (octaves < 0) octaves = 0;
         if (heightCount < 1) heightCount = 1;
 
-        RebuildRegionsArray();
+        if (useColourGradient)
+        {
+            RebuildRegionsArray();
+        }
     }
 
     public void RebuildRegionsArray()

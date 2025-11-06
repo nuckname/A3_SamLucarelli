@@ -10,7 +10,7 @@ public class MapGenerator : MonoBehaviour
     {
         float noiseScale = mapTerrain.useSeed ? mapTerrain.defaultNoiseScale : mapTerrain.noiseScale;
         int octaves = mapTerrain.useSeed ? mapTerrain.defaultOctaves : mapTerrain.octaves;
-        float persistance = mapTerrain.useSeed ? mapTerrain.defaultPersistance : mapTerrain.persistance;
+        float persistance = mapTerrain.useSeed ? mapTerrain.defaultPersistence : mapTerrain.persistance;
         float lacunarity = mapTerrain.useSeed ? mapTerrain.defaultLacunarity : mapTerrain.lacunarity;
         int blockSize = mapTerrain.useSeed ? mapTerrain.defaultBlockSize : mapTerrain.blockSize;
         int seed = mapTerrain.seed;
