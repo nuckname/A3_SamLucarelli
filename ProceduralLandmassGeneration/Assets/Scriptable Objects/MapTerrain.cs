@@ -137,6 +137,10 @@ public class MapTerrain : ScriptableObject
         }
     }
     
+    /// <summary>
+    /// Ensures the regions array has the correct length and height thresholds.
+    /// If keepColours is true, previously edited colours are preserved.
+    /// </summary>
     public void RebuildRegionsArray(bool keepColours)
     {
         Color[] old = null;
@@ -162,6 +166,11 @@ public class MapTerrain : ScriptableObject
         }
     }
 
+    
+    /// <summary>
+    /// Overwrites all region colours by sampling the gradient evenly from 0..1,
+    /// optionally reversed if reverseGradient is true.
+    /// </summary>
     private void ApplyGradient()
     {
         for (int i = 0; i < regions.Length; i++)
@@ -170,20 +179,31 @@ public class MapTerrain : ScriptableObject
         }
     }
 
+    /// <summary>
+    /// Returns the normalized position [0..1] within the gradient for a region index.
+    /// Handles edge cases like count <= 1 and respects reverseGradient.
+    /// </summary>
     private float SampleRegionColorPosition(int index, int count)
     {
-        //Normalized position along gradient [0 to 1]
         float u = (count <= 1) ? 0f : index / (count - 1f);
         if (reverseGradient) u = 1f - u;
         return Mathf.Clamp01(u);
     }
 
+    /// <summary>
+    /// Samples a colour from the gradient for the given region index.
+    /// Falls back to white if no gradient is assigned.
+    /// </summary>
     private Color SampleRegionColor(int index, int count)
     {
         float u = SampleRegionColorPosition(index, count);
         return (regionGradient != null) ? regionGradient.Evaluate(u) : Color.white;
     }
 
+    /// <summary>
+    /// Evenly spaces height thresholds from (1/count) up to 1.0.
+    /// The last region is forced to exactly 1.00. Others are rounded to 2 decimals.
+    /// </summary>
     private static float ThresholdFor(int index, int count)
     {
         if (count <= 1) return 1f;
@@ -193,13 +213,19 @@ public class MapTerrain : ScriptableObject
         return Mathf.Round(t * 100f) / 100f; // 2 decimal
     }
 
+    /// <summary>
+    /// Returns a new array containing the same colours currently stored in each region.
+    /// </summary>
     private static Color[] CopyColours(TerrainType[] src)
     {
         var outCols = new Color[src.Length];
         for (int i = 0; i < src.Length; i++) outCols[i] = src[i].colour;
         return outCols;
     }
-    
+   
+    /// <summary>
+    /// Builds thresholds and preserves colours.
+    /// </summary>
     public void RebuildRegionsArray()
     {
         Color[] oldColours = null;

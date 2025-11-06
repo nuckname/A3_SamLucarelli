@@ -2,8 +2,9 @@ using UnityEngine;
 using System.Collections;
 
 public static class MeshGenerator 
-{
-
+{ 
+    //Sebation's code
+    // https://github.com/SebLague/Procedural-Landmass-Generation/blob/master/Proc%20Gen%20E05/Assets/Scripts/MeshGenerator.cs
     public static MeshData GenerateTerrainMesh(float[,] heightMap, float heightAmplitude, AnimationCurve heightCurve, float heightPower = 1f) 
     {
         int width = heightMap.GetLength(0);
@@ -14,7 +15,6 @@ public static class MeshGenerator
         MeshData meshData = new MeshData(width, height);
         int vertexIndex = 0;
 
-        //Sebation's code
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 float h = heightMap[x, y];

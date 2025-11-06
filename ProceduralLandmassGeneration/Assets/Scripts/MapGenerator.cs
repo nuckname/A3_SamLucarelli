@@ -6,6 +6,9 @@ public class MapGenerator : MonoBehaviour
 
     public enum MeshType { NoiseMap, ColourMap }
 
+    /// <summary>
+    /// Generates map using perlin noise parameters :)
+    /// </summary>
     public void GenerateMap()
     {
         float noiseScale = mapTerrain.useSeed ? mapTerrain.defaultNoiseScale : mapTerrain.noiseScale;
@@ -158,10 +161,13 @@ public class MapGenerator : MonoBehaviour
 
         return q;
     }
-
+    
+    /// <summary>
+    /// Automatically regenerates the map when values change in the Inspector,
+    /// keeping the scene preview up-to-date while not in Play Mode.
+    /// </summary>
     private void OnValidate()
     {
-        //Keeps the scene previews responsive while not in playmode
         if (!Application.isPlaying && mapTerrain != null)
             GenerateMap();
     }
