@@ -71,7 +71,7 @@ public class MapTerrain : ScriptableObject
     
         [Header("Height")]
             [InspectorName("Height Power")]
-            [Tooltip("Bends the height curve. <1 flattens low areas; >1 exaggerates peaks.")]
+            [Tooltip("To the power of Height Multipler")]
             [Range(0.1f, 5f)] public float heightPower = 1f;
         
             [InspectorName("Mesh Height Multiplier")]
@@ -79,7 +79,7 @@ public class MapTerrain : ScriptableObject
             public float meshHeightMulti = 1f;
             
             [InspectorName("Height Curve")]
-            [Tooltip("Fine-tune how raw noise (0..1) maps to final height. Left=low, Right=high.")]
+            [Tooltip("Use a graph to determine the height")]
     	    public AnimationCurve heightCurve = AnimationCurve.Linear(0, 0, 1, 1);
     	    
             [InspectorName("Height Mode")]
