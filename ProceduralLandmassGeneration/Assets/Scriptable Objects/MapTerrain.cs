@@ -115,10 +115,6 @@ public class MapTerrain : ScriptableObject
         [InspectorName("Auto Update")]
         [Tooltip("Automatically updates the terrain without having to click the generate button.")]
         public bool autoUpdate = false;
-
-        
-     // References   
-     [SerializeField] private GradientMapTerrain gradientMapTerrain;   
      
     // Make the asset self-consistent when edited
     private void OnValidate()
@@ -128,16 +124,82 @@ public class MapTerrain : ScriptableObject
         if (heightCount < 1) heightCount = 1;
 
         
+        //First, rebuild the regions array.
+        //if true: keep the existing colours if they already exist.
+        //This ensures region heights update correctly without removing/replacing user-edited colours.
+        RebuildRegionsArray(true);
+
+        // If the colour-gradient feature is enabled,
+        // then overwrite all region colours using the gradient.
         if (useColourGradient)
         {
-            gradientMapTerrain.ApplyGradientToRegions();
+            ApplyGradient();
+        }
+    }
+    
+    public void RebuildRegionsArray(bool keepColours)
+    {
+        Color[] old = null;
+        if (keepColours && regions != null)
+        {
+            old = CopyColours(regions);
         }
         else
         {
-            gradientMapTerrain.RebuildKeepColours();
+            old = null;
+        }
+
+        if (regions == null || regions.Length != heightCount)
+            regions = new TerrainType[heightCount];
+
+        //Update thresholds and restore colours, if possible
+        for (int i = 0; i < heightCount; i++)
+        {
+            regions[i].height = ThresholdFor(i, heightCount);
+
+            if (keepColours && old != null && i < old.Length)
+                regions[i].colour = old[i];
         }
     }
 
+    private void ApplyGradient()
+    {
+        for (int i = 0; i < regions.Length; i++)
+        {
+            regions[i].colour = SampleRegionColor(i, regions.Length);
+        }
+    }
+
+    private float SampleRegionColorPosition(int index, int count)
+    {
+        //Normalized position along gradient [0 to 1]
+        float u = (count <= 1) ? 0f : index / (count - 1f);
+        if (reverseGradient) u = 1f - u;
+        return Mathf.Clamp01(u);
+    }
+
+    private Color SampleRegionColor(int index, int count)
+    {
+        float u = SampleRegionColorPosition(index, count);
+        return (regionGradient != null) ? regionGradient.Evaluate(u) : Color.white;
+    }
+
+    private static float ThresholdFor(int index, int count)
+    {
+        if (count <= 1) return 1f;
+        if (index == count - 1) return 1f;
+
+        float t = (index + 1f) / count;
+        return Mathf.Round(t * 100f) / 100f; // 2 decimal
+    }
+
+    private static Color[] CopyColours(TerrainType[] src)
+    {
+        var outCols = new Color[src.Length];
+        for (int i = 0; i < src.Length; i++) outCols[i] = src[i].colour;
+        return outCols;
+    }
+    
     public void RebuildRegionsArray()
     {
         Color[] oldColours = null;
